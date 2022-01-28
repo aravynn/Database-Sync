@@ -16,9 +16,12 @@
 #include <string>		// std::string
 #include <utility>		// for std::pair
 #include <vector>		// std::vector
-#include <sstream> // std::Stringstream
+#include <sstream>		// std::Stringstream
 #include <iomanip>		// for std::setfill, std::setw
 #include <climits>		// for SCHAR_MAX
+
+//#include <thread>		// for testing the status bar effect.
+//#include <chrono>
 
 class NetConnect : public PHPConfig
 {
@@ -43,6 +46,10 @@ private:
 	bool checkChar(char c);
 	std::string cleanName(std::string& name);
 	std::string getFileType(std::string& fileData);
+
+	std::string statusBar(std::string title, int current, int total); // create and output a self-erasing status bar that will display completion
+
+	int getUploadCount(); // get the upload information from the datasync DB table.
 
 public:
 	NetConnect();

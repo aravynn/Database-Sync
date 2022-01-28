@@ -1,0 +1,34 @@
+## To complete:
+
+hosecontrol:
+	alter all tables to store the id separate from PK for all elements. this should be unique but not pk.
+	alter storage of test data to store in blob in TestData instead of in own dedicated table, for simplicity and size reduction of DB. 
+	update all instances of setting the table ID to start from 1 instead of 0, to simplify. 
+	create functionality to link MySQL directly to the app, and simultaneously store data both locally as well as online. We'll eliminate datasync. 
+	implement error logging in a verbose method so we can "black box" problems that arise from all components. 
+	(DONE) update all getting of lastID and next ID to base on the last entered ID, instead of using the count of existing lines (caused last issue)
+	(DONE) clean up UI and add elements to increase clarity of some fields for things like titles. 
+	(DONE) make sure date fields in database are cast as INT not STRING
+	(DONE) we should add a format for multiple hoses that uses a + to store mutliple asset ids so that they are entered into the system correctly. 
+	(DONE) Reject hose dropdown option, allows hose to be rejected without testing. 
+	(SKIPPED) Fix "PDF has errors" message in acrobat.
+	Multiple retesting system to select existing
+
+database fixer: 
+	(DONE) check manually for any errors in the existing data and correct. 
+	(DONE) run corrector script on current database and replace, to fix any issues that exist. 
+	export function - hoses/companies/fittings etc. that can be reinserted to new database
+
+desktop: 
+	(DONE) Block updates on the desktop side for updating IDs. 
+		- data stopped, though we should update the formatting to log any errors
+	(DONE) alter view for the upload/download system from dots to a percentage system for uploads. we'll need to calculate total uploads and determine that way.
+		
+server: 
+	(DONE) This has been updated so that duplicated ID's are instead overwritten in the case that they are mistakenly added as an add. 
+		- However, these are added in a format that PK should always be used, so should therefore never esxperience an overwrite.
+	(SKIPPED) Block updates on the server side for updating IDs. 
+	(SKIPPED) only report back issues in the data formatting and log. 
+
+liveDB: 
+	(DONE) update all date fields to INT fields.

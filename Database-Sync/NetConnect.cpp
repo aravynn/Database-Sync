@@ -2,16 +2,22 @@
 
 NetConnect::NetConnect() : PHPConfig()
 {
+
+    //for (int i{ 0 }; i < 35; ++i) {
+    //    std::cout << statusBar("Sample", i*3, 100);
+        //std::this_thread::sleep_for(std::chrono::milliseconds(300));
+    //}
+    
+    
     // initialize the application. Most functions should run primarily here. 
     m_curl = curl_easy_init();
 
     // Access the DB, initialize connection
     m_DB = new SQLDatabase();
-    
 
     std::cout << static_cast<unsigned char>(218) << "--------------------------------" << static_cast<unsigned char>(191) << '\n';
     std::cout << '|' <<     " Database Sync For Hose Control " << '|' << '\n';
-    std::cout << '|' <<     " Version 1.0.0       12/23/2020 " << '|' << '\n';
+    std::cout << '|' <<     " Version 2.0.0       01/25/2022 " << '|' << '\n';
     std::cout << '|' <<     " Allow This To Complete Before  " << '|' << '\n';
     std::cout << '|' <<     " Entering or testing Hoses.     " << '|' << '\n';
     std::cout << static_cast<unsigned char>(192) << "--------------------------------" << static_cast<unsigned char>(217) << '\n';
@@ -26,9 +32,11 @@ NetConnect::NetConnect() : PHPConfig()
 
         std::cout << "Connection OK \n";
 
+
         // request for data transfers and changes to current DB, 10 rows at a time. (id changes, inserts, deletes, updates)
         LoadStatus ret = LoadStatus::OK;
 
+        /*
         std::string downloadReq = json::encode({ {"Download", (IDType)m_LineCount} }, { 1 });
 
         std::cout << "Download: ";
@@ -48,11 +56,17 @@ NetConnect::NetConnect() : PHPConfig()
 
         // create loop to go through all active uploads for transfer.
         ret = LoadStatus::OK;
-        std::cout << "Upload: ";
+        */
+        
+        //std::cout << "Upload: \n";
+
+        int totals = getUploadCount();
+        int count{ 0 };
+
         while ((int)ret > -1) {
             // get ten rows of transfer (updates, inserts, etc)
             // for each 10 rows, get the data to be transferred.
-            
+            count = totals - getUploadCount() + 1;
             // concatenate data into JSON file
             std::string uploadReq = UploadString();
             
@@ -72,23 +86,22 @@ NetConnect::NetConnect() : PHPConfig()
             // get return data and any changes (should only be PK changes) 
             ret = UploadReturn();
             
-            
-
             // execute any changes as prescribed by the returned changes 
             ClearUploads();
 
             if (ret == LoadStatus::UPLOAD_ERROR) {
-                std::cout << "\n Upload Failed \n";
+                std::cout << "Upload Failed                                    \n";
                 break; // exit the loop, there is an upload error.
             }
-            std::cout << ".";
+            std::cout << statusBar("Upload: ", count, totals);
         }
-        std::cout << "\n Upload OK \n";
+        std::cout << "Upload OK                                      \n";
     }
     else {
 
         std::cout << "Connection Failed! Aborting... \n";
     }
+    
 }
 
 NetConnect::~NetConnect()
@@ -343,6 +356,11 @@ LoadStatus NetConnect::UploadReturn()
         // in this case, we can assume that no additional downloads are required.
         return LoadStatus::COMPLETE;
     }
+
+
+    // This prevents the remaining code, as we'll give an OK value, even if data remains.
+    return LoadStatus::OK;
+
 
     // decode the return into an array. 
     DataPair data = json::decode(m_ReturnData);
@@ -839,4 +857,39 @@ std::string NetConnect::getFileType(std::string& fileData) {
 
     // if nothing matched, then it is not a valid image.
     return ".unknown";
+}
+
+std::string NetConnect::statusBar(std::string title, int current, int total)
+{
+    std::stringstream ss;
+    // create a viewable string
+    ss << title << " [";
+
+    // we'll display 20 blocks to denote percent complete. 
+    // calculate the current percent completed.
+    double percent = (double)current / (double)total;
+
+    int fillblocks = (int)(percent * 40);
+    
+    for (int i{ 0 }; i < 40; i++) {
+        ss << (i < fillblocks ? '#' : '_');
+    }
+    
+    percent *= 100; // get a true percentage.
+
+    ss << "] " << current << '/' << total;
+
+    return ss.str() + (current >= total ? '\n' : '\r');
+}
+
+int NetConnect::getUploadCount()
+{
+    std::vector<std::string> columns{ "count(PK)" };
+
+    DataPair filter;
+    filter.push_back({ std::string(), std::string() });
+    
+    DataPair res = m_DB->Select(columns, "DataSync", filter);
+
+    return res.at(0).second.num;
 }

@@ -446,6 +446,73 @@ bool SQLDatabase::PushPK(int ID, std::string table, int count)
     return false;
 }
 
+DataPair SQLDatabase::Complex(std::string& command, DataPair filter)
+{
+    // will run an SQL statement "as is" in comparison to the select or other function.
+    
+    if (m_ReturnData.size() > 0) {
+        m_ReturnData.resize(0); // clear the data vector.
+    }
+
+    if (m_verbose)
+        std::cout << command << '\n'; // let's see it look OK.
+
+    // add the sql statement to be used
+
+    sqlite3_stmt* stmt;
+
+    int prep = sqlite3_prepare_v2(m_DB, command.c_str(), -1, &stmt, 0);
+
+    if (prep != SQLITE_OK) {
+        if (m_verbose) {
+            std::cerr << "failed to prepare complex statement: " << command << "\n Result: " << prep << '\n';
+        }
+        return { {(std::string)"",(std::string)""} };
+    }
+
+    if (!Bind(stmt, filter)) {
+
+        if (m_verbose) {
+            std::cerr << "ERROR: Failed to bind to statement \n";
+        }
+        return { {(std::string)"",(std::string)""} };
+    }
+
+    while (sqlite3_step(stmt) == SQLITE_ROW) {
+        // for each row, manage all data. we'll need to have an idea of row count, ideally. 
+        for (int i{ 0 }; i < sqlite3_column_count(stmt); ++i) {
+            switch (sqlite3_column_type(stmt, i)) {
+            case SQLITE_INTEGER:
+                // std::cout << sqlite3_column_name(stmt, i) << " -> " << sqlite3_column_int(stmt, i) << '\n';
+                m_ReturnData.push_back({ (std::string)sqlite3_column_name(stmt, i),  (IDType)sqlite3_column_int(stmt, i) });
+                break;
+            case SQLITE_TEXT:
+                // std::cout << sqlite3_column_name(stmt, i) << " -> " << sqlite3_column_text(stmt, i) << '\n';
+                m_ReturnData.push_back({ (std::string)sqlite3_column_name(stmt, i),  std::string(reinterpret_cast<const char*>(sqlite3_column_text(stmt, i))) });
+                break;
+            case SQLITE_FLOAT:
+                // std::cout << sqlite3_column_name(stmt, i) << " -> " << sqlite3_column_double(stmt, i) << '\n';
+                m_ReturnData.push_back({ (std::string)sqlite3_column_name(stmt, i),  (double)sqlite3_column_double(stmt, i) });
+                break;
+            case SQLITE_NULL:
+                //std::cout << "NULL VALUE RETURNED at SQLD 137 \n";
+                m_ReturnData.push_back({ (std::string)sqlite3_column_name(stmt, i),  std::string("") });
+                break;
+            default:
+                //std::cout << "undefined column type:: " << sqlite3_column_type(stmt, i) << ' ' << (std::string)sqlite3_column_name(stmt, i) << ' ' << std::string(reinterpret_cast<const char*>(sqlite3_column_text(stmt, i))) << '\n';
+
+                std::cout << "undefined column type:: " << sqlite3_column_type(stmt, i) << '\n';
+                break;
+            }
+        }
+    }
+    // complete the function. 
+    sqlite3_finalize(stmt);
+
+    return m_ReturnData;
+
+}
+
 IDType SQLDatabase::getNextPK(std::string table) {
     // get the next PK to be entered into a particular table
     std::string REQUEST = "SELECT count(PK) FROM " + table;

@@ -43,6 +43,8 @@ public:
 
 	bool PushPK(int ID, std::string table, int count = 1);		// push up the PK value for the ID, by COUNT specified.
 
+	DataPair Complex(std::string& command, DataPair filter);
+
 	IDType getNextPK(std::string table);
 	
 	~SQLDatabase();

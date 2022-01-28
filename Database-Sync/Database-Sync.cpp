@@ -9,9 +9,11 @@
  * 
  * 
  */
-
+#define NOMINMAX
 
 #include <iostream>
+#include <limits>
+
 
 // includes for DLL's
 #include "curl.h"
@@ -26,23 +28,29 @@
 #include "SQLDatabase.h"    // database control class.
 #include "NetConnect.h"     // Netconnect control 
 #include "json.h"
-
+#include "DBClean.h"        // database status checker.
 
 int main()
 {
-   
-    NetConnect d;
+    std::cout << "HoseControl helper functions. \n Please make a selection: \n"
+        << "        1 - Database Sync \n"
+        << "        2 - Database Health Check \n";
 
- 
-    //std::cout << char(248);
- 
- 
- //    std::string data = "-1";
-//    bool retdata = d.Transfer(data);
+    int x; 
+    std::cin >> x;
 
-  //  SQLDatabase db;
-  //  db.PushPK(50, "Companies", 50);
-   
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
+    if (x == 1) {
+        NetConnect d;
+    }
+    else if (x == 2) {
+        DBClean b;
+    }
+
+    system("pause");    // prevent window from automatically closing, at end of execution.
+    
+    return 0;
 }
 
 
