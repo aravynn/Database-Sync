@@ -2,6 +2,9 @@
 
 void DBClean::printErrors(std::string title, DataPair data)
 {
+	// This is a generic function to output errors to the console. 
+	// this generates a list of all ID's that have issues, however not the specifics of those errors. 
+
 	if (data.size() < 1) return;
 
 	std::cout << title << " ";
@@ -15,6 +18,10 @@ void DBClean::printErrors(std::string title, DataPair data)
 
 void DBClean::fixDate(DataPair errLine, Table table)
 {
+	// this checks for dates that are below the minimum threshhold for logical dates. 
+	// primarily, this is looking for 0 or null values. 
+	// this will automatically attempt to repair any values that are below by setting them to the preceeding value.
+
 	if (errLine.size() < 1) return;
 
 	std::string REQUEST = "";
@@ -47,6 +54,9 @@ void DBClean::fixDate(DataPair errLine, Table table)
 
 void DBClean::fixMismatch(DataPair errLine)
 {
+	// this looks for dependency issues within the database by checking that reference ID values have a logically matching value. 
+	// this will only output the errored lines, not attempt a fix. 
+
 	if (errLine.size() < 1) return;
 
 	std::string requestOwner = "UPDATE HoseTests "
@@ -71,6 +81,11 @@ void DBClean::fixMismatch(DataPair errLine)
 
 void DBClean::fixTestDataLength(DataPair errLine)
 {
+	// this function checks that data exists or that the data matches the total lines generated.
+	// this will attempt to fix by creating a single line if none exist, 
+	// set duplicates to -1 so that they are not part of the same data set, 
+	// or fill gaps by setting it the last iterative value from the same test.
+
 	std::string getTestData = "SELECT * FROM TestData WHERE TestPK = :PK";
 	DataPair filter;
 	filter.push_back({std::string(":PK"), (long long)0});
@@ -143,6 +158,8 @@ void DBClean::fixTestDataLength(DataPair errLine)
 
 DBClean::DBClean()
 {
+	// this will run the audit process and manage data accordingly. 
+
 	std::cout << "File Error Audit \n";
 	std::cout << "----------------\n";
 
@@ -150,30 +167,33 @@ DBClean::DBClean()
 	filter.push_back({ std::string(), std::string() });
 	bool missingLink = false;
 
+	// check company linkages
 	std::string REQUEST = "SELECT DISTINCT C.PK FROM Companies AS C WHERE C.PK NOT IN (SELECT CompanyPK FROM Contacts) OR C.PK NOT IN (SELECT CompanyPK FROM Locations)";
 	DataPair BadRetVals = m_db.Complex(REQUEST, filter);
 	printErrors("Companies with Link Issues:", BadRetVals);
 	missingLink = (BadRetVals.size() > 0 ? true : missingLink);
 
+	// check hose linkages.
 	REQUEST = "SELECT DISTINCT H.PK FROM Hoses as H WHERE H.TemplatePK NOT IN (SELECT PK FROM HoseTemplates) OR H.OwnerPK NOT IN (SELECT PK FROM Companies) OR "
 		"H.locationPK NOT IN (SELECT PK FROM Locations) OR H.CouplingAPK NOT IN (SELECT PK FROM FittingTemplates) OR H.CouplingBPK NOT IN (SELECT PK FROM FittingTemplates)";
 	BadRetVals = m_db.Complex(REQUEST, filter);
 	printErrors("Hoses with Link Issues:", BadRetVals);
 	missingLink = (BadRetVals.size() > 0 ? true : missingLink);
 
-
+	// check template linkages. 
 	REQUEST = "SELECT DISTINCT H.PK FROM HoseTemplates as H WHERE H.CouplingAPK NOT IN (SELECT PK FROM FittingTemplates) OR H.CouplingBPK NOT IN (SELECT PK FROM FittingTemplates)";
 	BadRetVals = m_db.Complex(REQUEST, filter);
 	printErrors("Templates with Link Issues:", BadRetVals);
 	missingLink = (BadRetVals.size() > 0 ? true : missingLink);
 
-
+	// check hose test linkages.
 	REQUEST = "SELECT DISTINCT H.PK FROM HoseTests as H WHERE H.PK NOT IN (SELECT DISTINCT TestPK FROM TestData) OR H.HosePK NOT IN (SELECT PK FROM Hoses) OR "
 		"H.OwnerPK NOT IN (SELECT PK FROM Companies)";
 	BadRetVals = m_db.Complex(REQUEST, filter);
 	printErrors("Hose Tests with Link Issues:", BadRetVals);
 	missingLink = (BadRetVals.size() > 0 ? true : missingLink);
 
+	// block proceeding until main links are corrected, this is essential for moving forward.
 	if (missingLink) { 
 		
 		std::cout << "Fix all link errors before proceeding with other errors. \n";
@@ -181,18 +201,22 @@ DBClean::DBClean()
 	}
 
 	// From here one we're not dealing with links. 
+
+	// check for data mismatches for test/hose/location
 	REQUEST = "SELECT PK FROM HoseTests WHERE PK NOT IN (SELECT DISTINCT T.PK FROM HoseTests as T, Companies as C, Hoses as H, Locations as L WHERE "
 		"T.OwnerPK = H.OwnerPK AND L.CompanyPK = T.OwnerPK AND H.OwnerPK =  L.CompanyPK AND T.HosePK = H.PK AND H.LocationPK = L.PK)";
 	BadRetVals = m_db.Complex(REQUEST, filter);
 	printErrors("Data Mismatch Issues By Hose Test:", BadRetVals);
 	fixMismatch(BadRetVals);
 
+	// fix data count issues
 	REQUEST = "select DISTINCT T.PK from HoseTests as T, (select TestPK as pk, max(IntervalNumber) as m, count(pk) as c from TestData group by TestPK) as V WHERE "
 		"T.PK = V.pk AND v.m != V.c -1 OR T.PK NOT IN (SELECT DISTINCT TestPK FROM TestData)";
 	BadRetVals = m_db.Complex(REQUEST, filter);
 	printErrors("Test Data With Too Much Or Little Testing Data:", BadRetVals);
 	fixTestDataLength(BadRetVals);
 
+	// check for bad date issues.
 	REQUEST = "SELECT PK FROM Hoses WHERE MFGDate < 700000 OR EXPDate < 700000";
 	BadRetVals = m_db.Complex(REQUEST, filter);
 	printErrors("Hoses With Bad Date Data:", BadRetVals);

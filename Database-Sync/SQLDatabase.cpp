@@ -31,6 +31,9 @@ SQLDatabase::~SQLDatabase() {
 
 bool SQLDatabase::GetDBLocation()
 {
+    // get the database location and set for class.
+    // returns result of search.
+
     TCHAR path[MAX_PATH]{ 0 };
     if (::SHGetSpecialFolderPath(NULL, path, CSIDL_MYDOCUMENTS, FALSE)) {
         std::stringstream ss;
@@ -53,6 +56,7 @@ bool SQLDatabase::GetDBLocation()
 
 DataPair SQLDatabase::Select(std::vector<std::string> columns, std::string table, DataPair filter, int limit, int offset)
 {
+    // perform a select action on the database, functionally similar to HoseControl
 
 	if (m_ReturnData.size() > 0) {
 		m_ReturnData.resize(0); // clear the data vector.
@@ -232,6 +236,8 @@ bool SQLDatabase::Insert(std::string table, DataPair inserts)
 
 bool SQLDatabase::Update(std::string table, DataPair updates, DataPair filter)
 {
+    // perform a update action on the database, functionally similar to HoseControl
+
     std::string REQUEST = "UPDATE " + table + " SET";
 
     if (updates.at(0).first == "") {
@@ -309,6 +315,7 @@ bool SQLDatabase::Update(std::string table, DataPair updates, DataPair filter)
 
 bool SQLDatabase::Remove(std::string table, DataPair filter)
 {
+    // perform a delete action on the database, functionally similar to HoseControl
 
     std::string REQUEST = "DELETE FROM " + table + " WHERE";
 
@@ -371,6 +378,7 @@ bool SQLDatabase::PushPK(int ID, std::string table, int count)
 {
     // pusk all PK's above the given number UP by one, to make a row for an incoming insert. 
     // this function will also need to manage every table that is related, as per the CHILD values given in the TableFormat table. 
+    // Caution: This should be handled externally by foreign keys
 
     //std::cout << 1 << '\n';
 
@@ -449,6 +457,7 @@ bool SQLDatabase::PushPK(int ID, std::string table, int count)
 DataPair SQLDatabase::Complex(std::string& command, DataPair filter)
 {
     // will run an SQL statement "as is" in comparison to the select or other function.
+    // note that no "checking" is done on these, so use with caution.
     
     if (m_ReturnData.size() > 0) {
         m_ReturnData.resize(0); // clear the data vector.

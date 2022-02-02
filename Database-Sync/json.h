@@ -27,8 +27,8 @@ private:
 public:
 	json();
 	static std::string encode(DataPair data, std::vector<size_t> rowlen);	//use a full-length array of row lengths to determine each row, so different data sizes can be used.
-	static DataPair decode(std::string data);
-	static std::string ReplaceAll(std::string str, const std::string from, const std::string to);
-	static std::string CleanString(std::string str);
+	static DataPair decode(std::string data);								// decode to datapairs for later use, for return data.
+	static std::string ReplaceAll(std::string str, const std::string from, const std::string to);	// replace string in string.
+	static std::string CleanString(std::string str);						// clean symbols that would affect content.
 };			
 

@@ -23,6 +23,17 @@
 //#include <thread>		// for testing the status bar effect.
 //#include <chrono>
 
+/**
+* 
+* NetConnect Class
+* 
+* Manages the connection to the PHP connector for data transfer
+* Designed for transferring the content as JSON strings. 
+* If Data is too long will send as chunks for easier later 
+* combination and decoding.
+* 
+*/
+
 class NetConnect : public PHPConfig
 {
 private:

@@ -32,6 +32,7 @@
 
 int main()
 {
+    // get user input for what function to call. only runs once before completion
     std::cout << "HoseControl helper functions. \n Please make a selection: \n"
         << "        1 - Database Sync \n"
         << "        2 - Database Health Check \n";
@@ -41,6 +42,7 @@ int main()
 
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
+    // call the appropriate function
     if (x == 1) {
         NetConnect d;
     }

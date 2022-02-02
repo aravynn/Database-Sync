@@ -17,7 +17,7 @@ ShaHandler::~ShaHandler() {
 }
 
 std::string ShaHandler::Encode(std::string& val, bool raw) {
-
+    // encode using the given sha type expected. Note that RAW returns raw bytes, otherwise HEX
     switch (m_SHAType) {
     case 1:
         return encodesha1(val, raw);

@@ -1,5 +1,8 @@
 ## To complete:
 
+This is a list of all things required to be completed for the database sync and hosecontrol application. 
+Note that is is a list of "nice to have" and not specifically essential functions. 
+
 hosecontrol:
 	alter all tables to store the id separate from PK for all elements. this should be unique but not pk.
 	alter storage of test data to store in blob in TestData instead of in own dedicated table, for simplicity and size reduction of DB. 

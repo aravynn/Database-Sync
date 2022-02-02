@@ -2,6 +2,9 @@
 
 NetConnect::NetConnect() : PHPConfig()
 {
+    // load the connection application and manage the connection. 
+    // This will handle all display and other information.
+
 
     //for (int i{ 0 }; i < 35; ++i) {
     //    std::cout << statusBar("Sample", i*3, 100);
@@ -106,6 +109,8 @@ NetConnect::NetConnect() : PHPConfig()
 
 NetConnect::~NetConnect()
 {
+    // clean up connections and delete objects.
+
     curl_easy_cleanup(m_curl); // clean up curl. This was a memory leak.
     curl_global_cleanup();
 	delete m_DB;
@@ -230,6 +235,8 @@ bool NetConnect::Transfer(std::string &data)
 }
 
 size_t NetConnect::WriteCallback(void* contents, size_t size, size_t nmemb, void* userp) {
+    // cURL function callback. 
+
     ((std::string*)userp)->append((char*)contents, size * nmemb);
 
     return size * nmemb;
@@ -861,6 +868,8 @@ std::string NetConnect::getFileType(std::string& fileData) {
 
 std::string NetConnect::statusBar(std::string title, int current, int total)
 {
+    // generate a styled status bar for easier progress reading.
+
     std::stringstream ss;
     // create a viewable string
     ss << title << " [";

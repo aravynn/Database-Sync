@@ -6,6 +6,8 @@ json::json() {
 
 std::string json::encode(DataPair data, std::vector<size_t> rowlen) {
 
+	// Encode data to a json format. The information must be granted a length to create array values for later passing. 
+
 	size_t dataSize = data.size();
 	size_t rowSize = rowlen.size();
 	
@@ -64,6 +66,8 @@ std::string json::encode(DataPair data, std::vector<size_t> rowlen) {
 }
 
 DataPair json::decode(std::string data) {
+
+	// decode JSON string back to Datapair values for parsing in later fnctions.
 
 	size_t dataLength = data.size();
 	DataPair retData;
@@ -166,6 +170,8 @@ DataPair json::decode(std::string data) {
 
 std::pair<std::string, DataPass> json::compileData(std::string title, std::string data, DPO type)
 {
+
+	//convert given data to a datapass.
 
 	//std::cout << "JSON - Compile variable: " << title; 
 

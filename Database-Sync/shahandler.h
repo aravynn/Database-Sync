@@ -10,6 +10,13 @@
 #include "openssl/evp.h"
 #include "openssl/err.h"
 
+/**
+* 
+* Handles SHA encryption for use throughout the application. Pulls connection from the OpenSSL library.
+* 
+* 
+*/
+
 class ShaHandler
 {
 private:

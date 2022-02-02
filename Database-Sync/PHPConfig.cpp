@@ -50,6 +50,8 @@ PHPConfig::~PHPConfig() {
 
 bool PHPConfig::getDocumentPath()
 {	
+	// get the local path of the config file, stored in the DB folder.
+
 	TCHAR path[MAX_PATH]{ 0 };
 	if (::SHGetSpecialFolderPath(NULL, path, CSIDL_MYDOCUMENTS, FALSE)) {
 		std::stringstream ss;
@@ -86,7 +88,6 @@ bool PHPConfig::checkConfigFile() {
 	std::stringstream ss;
 	int stringcount = 0;
 
-	// FILE WILL REQUIRE DECRYPTION HERE!!! ------------------------------------------------------------------------------------/
 	int initCount = 20;
 
 	myfile.seekg(0, std::ios_base::end);  // go to end of file

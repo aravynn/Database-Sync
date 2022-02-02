@@ -11,6 +11,12 @@
 
 #include "shahandler.h"	// sha controller function
 
+/**
+* 
+* PHP Config manages the php connection for the database and 
+* handles the configuration file for automated connection.
+* 
+*/
 
 class PHPConfig
 {
@@ -27,7 +33,7 @@ protected:
 	bool checkConfigFile();					// check if the config file is created
 	bool createConfigFile(std::string& User, std::string& Pass, std::string& Salt, std::string& path);
 
-	std::string stringEncrypt(std::string& string); // encrypt a string using a blockchain approach for temporary storage.
+	std::string stringEncrypt(std::string& string); // encrypt a string using a chain approach for temporary storage.
 
 	std::string stringDecrypt(); // decrypter will always use the default file.
 
