@@ -1,0 +1,47 @@
+Documentation for Database-sync, the buddy application for hosecontrol.
+
+Database sync is a console-only application designed for quickly transferring the information from the SQlite databse up to the MySQL databse Via PHP based interface online at mepbrothers.com/_hosectl/
+
+This application has minimum user interactivity, and is designed for simplicity. This has a few dependencies: 
+	OpenSSL
+	libCurl
+	SQlite
+
+Pages/functions
+	This minimally designed application only has 2 functions, 1 and 2. 
+		1 - Sync function. This function manages the data sync from the SQLlite statbase up to the main MySQL databse. This function originally also would download information however due to a potential hiccup in this functionality, it has been placed on pause until this can be sorted. The bug in question causes gaps within the identities in the database leading to missing information causing issues. Works well however when this function is negated, thereby ignoring this issue. 
+		
+		2 - Database clean function. This function searches the databse for errors, then outputs the errors to screen. The errors only relate to the ID's found, but will not be more specific, however this is usually enough to determine what is missing and correct the issue. The information found (and repaired, if relevant) are: 
+			Company Linkage
+				Checks if users have valid contacts and locations related, returns the company id if found.
+			Hose Linkage
+				Checks if hoes have valid templates, customers, and locations
+			Template Linkage
+				Checks if templates are missing fittings
+			Hose Test Linkage
+				Check if tests have proper location customer, and hoses attached as well as test data.
+			Block if found: 
+				If any of the above are found, the app will stop for the user to resolve those issues first.
+			Mismatch hose/test/location
+				Checks and sees if information is mismatched between tables, and attempts to repair issues.
+			data count issue
+				Checks if data is too much or little for the test. If found, it will attempt to correct the issue by filling gaps or removing duplicates.
+			bad date issue
+				Checks if dates are incorrect. If they are too low, it will correct by resetting to the date from the line above.
+Classes
+	DBClean
+		This handles the search and fixing functionality for the database clean function. This class self-encapsulates the entire process.
+	Json
+		This class manages and encodes or decodes json strings for other classes.
+	NetConnect
+		This is the main application function for syncing, handles all aspects for the sync, as well as user interface for the application load. 
+	PHPConfig
+		This handles the connection to the PHP connector, and loads the curl link to pass data as json sctrings. This also had the capability to edit with download information, that is now deactiveated for the time being
+	shahandler
+		This handles sha ecryption for saving and encrypting data for transfer.
+	SQLDatabase
+		this manages access to the sqlite database through a variety of simple functions, that remove SQL coding from the application directly.
+	structs
+		Generic sctructs and enums for the application.
+Storage	
+	The app configuration file is store in the hosetracker/db file, along with the sqlite databse for the hosetracker.
